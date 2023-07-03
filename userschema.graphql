@@ -1,0 +1,60 @@
+schema{
+    query: query
+    mutation: Mutation
+}
+
+type Query{
+    getUserById(userId: ID!): User!
+    getUsers(limit:Int!, nextToken: String): UsersPage!
+    myPosts(limit:Int!, nextToken: String): PostItem!
+}
+
+type PostItem {
+    posts: [Post]
+    nextToken: String
+}
+
+type Post {
+    userId: ID!
+    postId: ID!
+    user: User!
+    postTitle: String!
+    postDescription: String!
+    postImageUrl: AWSURL
+    createdAt: AWSDateTime!
+    updatedAt: AWSDateTime!
+    postLocation: String!
+}
+
+type UsersPage{
+    users: [User]
+    nextToken: String
+}
+
+type User {
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    email: String!
+    contactNo: Int!
+    aadhar: String!
+    pan: String!
+    imageUrl: AWSURL
+    createdAt: AWSDateTime!
+    updatedAt: AWSDateTime!
+}
+
+type Mutation {
+    createUser(newUser: UserInput): User! @aws_auth(cognito_groups:["AamhiUniqueUser"])
+    createPost(newPost: PostInput): Boolean! @aws_auth(cognito_groups:["AamhiUniqueUser"])
+}
+
+type UserInput{
+    firstName: String!
+    lastName: String!
+    email: String!
+    contactNo: Int!
+    aadhar: String!
+    pan: String!
+    imageUrl: AWSURL
+}

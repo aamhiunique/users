@@ -1,0 +1,15 @@
+{
+  "name": "userbackend",
+  "version": "1.0.0",
+  "description": "This is for all the Users for aamhiunique",
+  "main": "userhandler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "VirtueVedaIntelligence",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-python-requirements": "^6.0.0"
+  }
+}

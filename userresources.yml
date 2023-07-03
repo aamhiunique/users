@@ -1,0 +1,64 @@
+usersTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: ${self:service}-users-table
+      AttributeDefinitions:
+        - AttributeName: "userId"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: "userId"
+          KeyType: "HASH"
+      Tags:
+        - Key: name
+          Value: users-table
+
+cognitoAamhiUserPool:
+  Type: AWS::Cognito::UserPool
+  Properties: 
+    UsernameAttributes: 
+      - email
+    UserPoolName: "AamhiUniqueUsers"
+
+cognitoAamhiUserPoolClient:
+  Type: AWS::Cognito::UserPoolClient
+  Properties:
+    ClientName: Web
+    UserPoolId: !Ref cognitoAamhiUserPool
+
+cognitoAamhiUniqueUserGroup:
+  Type: AWS::Cognito::UserPoolGroup
+  Properties: 
+    Description: "This Group is for normal Users who adds Posts Comments"
+    GroupName: AamhiUniqueUser
+    Precedence: 0
+    RoleArn: !GetAtt cognitoUserIAMRole.Arn
+    UserPoolId: !Ref cognitoAamhiUserPool
+
+cognitoUserIAMRole:
+  Type: AWS::IAM::Role
+  Properties: 
+    AssumeRolePolicyDocument: 
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal:
+            Federated:
+              - "cognito-identity.amazonaws.com"
+          Action:
+            - "sts:AssumeRoleWithWebIdentity"
+    Description: "This IAM role is used by Users"
+    Policies: 
+      - PolicyName: "aamhi-unique-users-group-policy"
+        PolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - Effect: Allow
+              Action:
+                - "dynamodb:*"
+              Resource:
+                - !GetAtt usersTable.Arn
+    RoleName: "aamhi-unique-users-role"
+    Tags: 
+      - Key: name
+        Value: aamhiunique-users-role

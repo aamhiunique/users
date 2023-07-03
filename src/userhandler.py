@@ -1,7 +1,7 @@
 import json
 
 
-def hello(event, context):
+def execuete(event, context):
     body = {
         "message": "Hello World!",
         "input": event
