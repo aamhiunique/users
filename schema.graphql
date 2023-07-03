@@ -1,9 +1,9 @@
-schema{
-    query: query
+schema {
+    query: Query
     mutation: Mutation
 }
 
-type Query{
+type Query {
     getUserById(userId: ID!): User!
     getUsers(limit:Int!, nextToken: String): UsersPage!
     myPosts(limit:Int!, nextToken: String): PostItem!

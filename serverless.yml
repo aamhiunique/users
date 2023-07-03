@@ -6,11 +6,36 @@ provider:
   name: aws
   runtime: python3.8
 
+plugins:
+  - serverless-appsync-plugin
+
+custom:
+  appSync:
+    name: aamhiUniqueUserAppSyncAPI
+    autheticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      awsRegion: us-east-1
+      defaultAction: ALLOW
+      userPoolId: !Ref cognitoAamhiUserPool
+    mappingTemplatesLocation: mapping-templates
+    mappingTemplates:
+      - type: Query
+        field: getUserById
+        datasource: usersTable
+      - type: Mutation
+        field: createUser
+        datasource: usersTable
+    datasources:
+      - type: AMAZON_DYNAMODB
+        name: usersTable
+        config:
+          tableName: !Ref booksTable
+
 functions:
   userhandler:
     handler: src/userhandler.execuete
-  partnerhandler:
-    handler: src/partnerhandler.execuete
+  # partnerhandler:
+  #   handler: src/partnerhandler.execuete
 
 resources:
   Resources:
@@ -19,10 +44,8 @@ resources:
       Properties:
         TemplateFile: ${file(userresources.yml)}
 
-    PartnerResources:
-      Type: AWS::CloudFormation::Stack
-      Properties:
-        TemplateFile: ${file(partnerresources.yml)}
+    # PartnerResources:
+    #   Type: AWS::CloudFormation::Stack
+    #   Properties:
+    #     TemplateFile: ${file(partnerresources.yml)}
 
-plugins:
-  - serverless-python-requirements

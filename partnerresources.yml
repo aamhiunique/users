@@ -24,7 +24,7 @@ cognitoAamhiPartnerPoolClient:
   Type: AWS::Cognito::PartnerPoolClient
   Properties:
     ClientName: Web
-    PartnerPoolId: !Ref cognitoAamhiPartnerPool
+    UserPoolId: !Ref cognitoAamhiPartnerPool
 
 cognitoAamhiUniquePartnerGroup:
   Type: AWS::Cognito::PartnerPoolGroup
@@ -33,7 +33,7 @@ cognitoAamhiUniquePartnerGroup:
     GroupName: AamhiUniquePartner
     Precedence: 0
     RoleArn: !GetAtt cognitoPartnerIAMRole.Arn
-    PartnerPoolId: !Ref cognitoAamhiPartnerPool
+    UserPoolId: !Ref cognitoAamhiPartnerPool
 
 cognitoPartnerIAMRole:
   Type: AWS::IAM::Role
