@@ -1,7 +1,6 @@
-
 service: usersbackend
 
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -9,11 +8,21 @@ provider:
 
 functions:
   userhandler:
-    handler: src/handler.execuete
+    handler: src/userhandler.execuete
+  partnerhandler:
+    handler: src/partnerhandler.execuete
 
 resources:
   Resources:
-    ${file(userresources.yml)}
-    ${file(partnerresources.yml)}
+    UserResources:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        TemplateFile: ${file(userresources.yml)}
+
+    PartnerResources:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        TemplateFile: ${file(partnerresources.yml)}
+
 plugins:
   - serverless-python-requirements

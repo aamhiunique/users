@@ -1,0 +1,64 @@
+partnersTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: ${self:service}-partners-table
+      AttributeDefinitions:
+        - AttributeName: "partnerId"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: "partnerId"
+          KeyType: "HASH"
+      Tags:
+        - Key: name
+          Value: partners-table
+
+cognitoAamhiPartnerPool:
+  Type: AWS::Cognito::PartnerPool
+  Properties:
+    PartnernameAttributes:
+      - email
+    PartnerPoolName: "AamhiUniquePartners"
+
+cognitoAamhiPartnerPoolClient:
+  Type: AWS::Cognito::PartnerPoolClient
+  Properties:
+    ClientName: Web
+    PartnerPoolId: !Ref cognitoAamhiPartnerPool
+
+cognitoAamhiUniquePartnerGroup:
+  Type: AWS::Cognito::PartnerPoolGroup
+  Properties:
+    Description: "This Group is for normal partners who adds Advertisements for brands"
+    GroupName: AamhiUniquePartner
+    Precedence: 0
+    RoleArn: !GetAtt cognitoPartnerIAMRole.Arn
+    PartnerPoolId: !Ref cognitoAamhiPartnerPool
+
+cognitoPartnerIAMRole:
+  Type: AWS::IAM::Role
+  Properties:
+    AssumeRolePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal:
+            Federated:
+              - "cognito-identity.amazonaws.com"
+          Action:
+            - "sts:AssumeRoleWithWebIdentity"
+    Description: "This IAM role is used by partners"
+    Policies:
+      - PolicyName: "aamhi-unique-partners-group-policy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - "dynamodb:*"
+              Resource:
+                - !GetAtt partnersTable.Arn
+    RoleName: "aamhi-unique-partners-role"
+    Tags:
+      - Key: name
+        Value: aamhiunique-partners-role

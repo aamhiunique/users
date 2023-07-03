@@ -3,7 +3,7 @@ import json
 
 def execuete(event, context):
     body = {
-        "message": "Hello World!",
+        "message": "This is partner Handler",
         "input": event
     }
 
