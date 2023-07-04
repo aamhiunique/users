@@ -3,7 +3,7 @@ import json
 
 def execuete(event, context):
     body = {
-        "message": "Hello World!",
+        "message": "Hello World! latest for app sync",
         "input": event
     }
 
