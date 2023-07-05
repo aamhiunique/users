@@ -1,51 +1,104 @@
-service: usersbackend
+service: au-userbackend
 
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: python3.8
-
-plugins:
-  - serverless-appsync-plugin
-
-custom:
-  appSync:
-    name: aamhiUniqueUserAppSyncAPI
-    autheticationType: AMAZON_COGNITO_USER_POOLS
-    userPoolConfig:
-      awsRegion: us-east-1
-      defaultAction: ALLOW
-      userPoolId: !Ref cognitoAamhiUserPool
-    mappingTemplatesLocation: mapping-templates
-    mappingTemplates:
-      - type: Query
-        field: getUserById
-        datasource: usersTable
-      - type: Mutation
-        field: createUser
-        datasource: usersTable
-    datasources:
-      - type: AMAZON_DYNAMODB
-        name: usersTable
-        config:
-          tableName: !Ref booksTable
+  region: us-east-1
+  httpApi:
+    cors: true
 
 functions:
-  userhandler:
-    handler: src/userhandler.execuete
-  # partnerhandler:
-  #   handler: src/partnerhandler.execuete
+  AamhiUniqueRegisterUser:
+    handler: src/registeruser.execuete
+    name: ${self:service}-register-aamhi-unique-user
+    role: AamhiUniqueRegisterUserRole
+    logSubcription: true
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./src/registeruser.py
+    events:
+      - http:
+          path: /${self:service}/aamhi-unique-register-user
+          method: post
+          # authorizer: 
+          #   type: token
+          #   identitySource: method.request.header.Authorization
+          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+    environment:
+      apiId: !Ref ApiGatewayRestApi
+      AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
 
 resources:
   Resources:
-    UserResources:
-      Type: AWS::CloudFormation::Stack
+    usersTable:
+      Type: 'AWS::DynamoDB::Table'
       Properties:
-        TemplateFile: ${file(userresources.yml)}
+        TableName: ${self:service}-users-table
+        AttributeDefinitions:
+          - AttributeName: 'userId'
+            AttributeType: 'S'
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: 'userId'
+            KeyType: 'HASH'
+        Tags:
+          - Key: name
+            Value: users-table
 
-    # PartnerResources:
-    #   Type: AWS::CloudFormation::Stack
-    #   Properties:
-    #     TemplateFile: ${file(partnerresources.yml)}
+    cognitoAamhiUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties: 
+        UsernameAttributes: 
+          - email
+        UserPoolName: 'AamhiUniqueUsers'
 
+    cognitoAamhiUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: Web
+        UserPoolId: !Ref cognitoAamhiUserPool
+
+    cognitoAamhiUniqueUserGroup:
+      Type: AWS::Cognito::UserPoolGroup
+      Properties: 
+        Description: 'This Group is for normal Users who adds Posts and Comments'
+        GroupName: AamhiUniqueUser
+        Precedence: 0
+        RoleArn: !GetAtt AamhiUniqueRegisterUserRole.Arn
+        UserPoolId: !Ref cognitoAamhiUserPool
+
+    AamhiUniqueRegisterUserRole:
+      Type: AWS::IAM::Role
+      Properties: 
+        RoleName: AamhiUniqueRegisterUserRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: AamhiUniqueRegisterUserRolePolicy
+            PolicyDocument: 
+              Version: '2012-10-17'
+              Statement: 
+                - Effect: Allow
+                  Action:
+                    - 'dynamodb:*'
+                  Resource:
+                    - !GetAtt usersTable.Arn
+                - Effect: Allow
+                  Action:
+                    - 'logs:*'
+                  Resource:
+                    - '*'
+        Tags: 
+          - Key: name
+            Value: aamhiunique-users-role
