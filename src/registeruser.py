@@ -13,38 +13,50 @@ def execuete(event, context):
             userId = get_random_id()
             email = user["email"]
             contact = user["contact"]
-            get_user_by_contact(contact)
-            get_user_by_email(email)
-            userFname = user["userFname"]
-            userLname = user["userLname"]
-            aadhar = user["aadhar"]
-            pan = user["pan"]
-            print(pan)
-            res = put_data_to_dynamo(userId,userFname,userLname,email,contact,aadhar,pan);
-        return {
-        "statusCode": "200",
-        "body": res
-        }
+            userExistsByEmail = get_user_by_email(email)
+            userExistsByContact = get_user_by_contact(contact)
+            if userExistsByEmail:
+                return {
+                        "statusCode": "201",
+                        "body": f'User with email {email} already exists'
+                        }
+            elif userExistsByContact:
+                return {
+                        "statusCode": "201",
+                        "body": f'User with contact {contact} already exists'
+                        }
+            else:
+                userFname = user["userFname"]
+                userLname = user["userLname"]
+                password = user["password"]
+                aadhar = user["aadhar"]
+                pan = user["pan"]
+                print(pan)
+                res = put_data_to_dynamo(userId,userFname,userLname,email,contact,aadhar, pan, password);
+                return {
+                        "statusCode": "201",
+                        "body": "User Register Successfully"
+                        }
     except Exception as ex:
-        print("Error in registaring user")
-    return {
-            "statusCode": "503",
-            "body": "Error"
-    }
-    
-def put_data_to_dynamo(userId, userFname, userLname, email, contact, aadhar, pan):
+            print("Error in registaring user")
+            return {
+                    "statusCode": "503",
+                    "body": "Error"
+            }
+            
+def put_data_to_dynamo(userId, userFname, userLname, email, contact, aadhar, pan, password):
     dynamoObj = get_dynamo()
-    username = userFname[1:3] + userLname[1:3]
+    username = userFname[0:3] + userLname[0:3]
     dynamoObj.put_item(
         Item={
             "userId":userId,
             "userFname":userFname,
             "userLname":userLname,
             "username": username,
-            "email":email,
-            "contact":contact,
-            "aadhar":aadhar,
-            "pan":pan
+            "email": email,
+            "password":password,
+            "active": 0,
+            "contact": contact
         }
     )
     return "Success"
@@ -54,24 +66,45 @@ def get_random_id():
     return id
 
 
-def get_user_by_email(email):
-    dynamoObj = get_dynamo()
-    response = dynamoObj.query(
-        KeyConditionExpression=Attr('email').eq(email)
-    )
-    print(response)
-    return "User with email already exists"
-
-def get_user_by_contact(contact):
-    dynamoObj = get_dynamo()
-    response = dynamoObj.query(
-        KeyConditionExpression=Attr('contact').eq(contact)
-    )
-    print(response)
-    return "User with contact already exists"
-
 def get_dynamo():
     table = os.environ.get("AAMHI_UNIQUE_REGISTER_TABLE")
     dynamo = boto3.resource("dynamodb")
     dynamoTable = dynamo.Table(table)
     return dynamoTable
+    
+def get_user_by_email(email):
+    dynamodb = boto3.client('dynamodb')
+    table = os.environ.get("AAMHI_UNIQUE_REGISTER_TABLE")
+    print(table)
+    try:
+        response = dynamodb.scan(
+            TableName=table,
+            FilterExpression='email= :email',
+            ExpressionAttributeValues={
+                ':email':{'S':email}
+            }
+        )
+        print(response)
+        return len(response['Items']) > 0
+    except Exception as e:
+        print(f'Error searching DynamoDB table: {e}')
+        return False
+        
+def get_user_by_contact(contact):
+    dynamodb = boto3.client('dynamodb')
+    table = os.environ.get("AAMHI_UNIQUE_REGISTER_TABLE")
+    print(table)
+    try:
+        response = dynamodb.scan(
+            TableName=table,
+            FilterExpression='contact= :contact',
+            ExpressionAttributeValues={
+                ':contact':{'S':contact}
+            }
+        )
+        print(response)
+        return len(response['Items']) > 0
+    except Exception as e:
+        print(f'Error searching DynamoDB table: {e}')
+        return False
+

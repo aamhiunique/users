@@ -32,6 +32,29 @@ functions:
       apiId: !Ref ApiGatewayRestApi
       AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
 
+  AamhiUniqueLoginUser:
+    handler: src/loginuser.execuete
+    name: ${self:service}-login-aamhi-unique-user
+    role: AamhiUniqueRegisterUserRole
+    logSubcription: true
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./src/loginuser.py
+    events:
+      - http:
+          path: /${self:service}/aamhi-unique-login-user
+          method: post
+          # authorizer: 
+          #   type: token
+          #   identitySource: method.request.header.Authorization
+          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+    environment:
+      apiId: !Ref ApiGatewayRestApi
+      AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
+
+
 resources:
   Resources:
     usersTable:
