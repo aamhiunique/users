@@ -20,7 +20,7 @@ def execuete(event, context):
                         }
             else:
                 return {
-                        "statusCode": "204",
+                        "statusCode": "206",
                         "body": f'User not registered with email {email} '
                         }
     except Exception as ex:
