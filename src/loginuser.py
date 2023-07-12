@@ -20,8 +20,8 @@ def execuete(event, context):
                         }
             else:
                 return {
-                        "statusCode": "206",
-                        "body": f'User not registered with email {email} '
+                        "statusCode": "401",
+                        "body": f'Invalid User email or passsword for {email} '
                         }
     except Exception as ex:
             print("Error in Login user")
@@ -40,7 +40,7 @@ def get_user_by_email_password(email, password):
             FilterExpression='email= :email and password= :password',
             ExpressionAttributeValues={
                 ':email': {'S': email},
-                'password': {'S': password}
+                ':password': {'S': password}
             }
         )
         print(response)

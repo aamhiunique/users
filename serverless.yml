@@ -9,6 +9,13 @@ provider:
   httpApi:
     cors: true
 
+custom:
+  domainName: ${self:service}
+  customDomain:
+    http:
+      createRoute53Record: true
+      certificateName: '*.aamhiunique.com'
+      domainName: aamhiunique.com
 functions:
   AamhiUniqueRegisterUser:
     handler: src/registeruser.execuete
