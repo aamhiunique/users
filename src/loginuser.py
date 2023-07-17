@@ -5,7 +5,7 @@ import uuid
 
 TAG="Login Aamhi unique User"
 
-def execuete(event, context):
+def execute(event, context):
     try:
         if "body" in event.keys():
             data = event["body"]
