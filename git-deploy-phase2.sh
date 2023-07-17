@@ -7,6 +7,7 @@ git status
 git add .
 
 #user input for commit message
+echo "Please enter commit Message"
 read readMessage
 
 # Commit changes with a custom message
@@ -38,5 +39,4 @@ if [[ $output =~ $searchString ]]; then
 else
   echo "Deploying on AWS"
 fi
-
 

@@ -23,3 +23,5 @@ serverless config credentials \
 # Step 5 deploy the code
 
 sls deploy
+
+Automate and chill
