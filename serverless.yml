@@ -18,7 +18,7 @@ custom:
       domainName: aamhiunique.com
 functions:
   AamhiUniqueRegisterUser:
-    handler: src/registeruser.execuete
+    handler: src/user/registeruser.execute
     name: ${self:service}-register-aamhi-unique-user
     role: AamhiUniqueRegisterUserRole
     logSubcription: true
@@ -26,7 +26,7 @@ functions:
       exclude:
         - ./**
       include:
-        - ./src/registeruser.py
+        - ./src/user/registeruser.py
     events:
       - http:
           path: /${self:service}/aamhi-unique-register-user
@@ -40,7 +40,7 @@ functions:
       AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
 
   AamhiUniqueLoginUser:
-    handler: src/loginuser.execuete
+    handler: src/user/loginuser.execute
     name: ${self:service}-login-aamhi-unique-user
     role: AamhiUniqueRegisterUserRole
     logSubcription: true
@@ -48,10 +48,32 @@ functions:
       exclude:
         - ./**
       include:
-        - ./src/loginuser.py
+        - ./src/user/loginuser.py
     events:
       - http:
           path: /${self:service}/aamhi-unique-login-user
+          method: put
+          # authorizer: 
+          #   type: token
+          #   identitySource: method.request.header.Authorization
+          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+    environment:
+      apiId: !Ref ApiGatewayRestApi
+      AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
+
+  AamhiUniqueUpdateUser:
+    handler: src/user/updateuser.execute
+    name: ${self:service}-update-aamhi-unique-user
+    role: AamhiUniqueRegisterUserRole
+    logSubcription: true
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./src/user/updateuser.py
+    events:
+      - http:
+          path: /${self:service}/aamhi-unique-update-user
           method: post
           # authorizer: 
           #   type: token
@@ -61,6 +83,71 @@ functions:
       apiId: !Ref ApiGatewayRestApi
       AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
 
+  AamhiUniqueGetAllUser:
+    handler: src/user/getusers.execute
+    name: ${self:service}-get-all-aamhi-unique-users
+    role: AamhiUniqueRegisterUserRole
+    logSubcription: true
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./src/user/getusers.py
+    events:
+      - http:
+          path: /${self:service}/get-all-aamhi-unique-users
+          method: get
+          # authorizer: 
+          #   type: token
+          #   identitySource: method.request.header.Authorization
+          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+    environment:
+      apiId: !Ref ApiGatewayRestApi
+      AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
+
+  AamhiUniqueGetUser:
+    handler: src/user/getuser.execute
+    name: ${self:service}-update-aamhi-unique-user
+    role: AamhiUniqueRegisterUserRole
+    logSubcription: true
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./src/user/getuser.py
+    events:
+      - http:
+          path: /${self:service}/aamhi-unique-get-user/{userId}
+          method: get
+          # authorizer: 
+          #   type: token
+          #   identitySource: method.request.header.Authorization
+          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+    environment:
+      apiId: !Ref ApiGatewayRestApi
+
+  AamhiUniqueDeleteUser:
+    handler: src/user/deleteuser.execute
+    name: ${self:service}-delete-aamhi-unique-user
+    role: AamhiUniqueRegisterUserRole
+    logSubcription: true
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./src/user/deleteuser.py
+    events:
+      - http:
+          path: /${self:service}/aamhi-unique-delete-user/{userId}
+          method: delete
+          # authorizer: 
+          #   type: token
+          #   identitySource: method.request.header.Authorization
+          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+    environment:
+      apiId: !Ref ApiGatewayRestApi
+      AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
+  
 
 resources:
   Resources:

@@ -1,7 +1,7 @@
 import json
 import os
-import boto3
 import uuid
+import boto3
 
 TAG = "Register Aamhi unique User"
 
@@ -11,7 +11,7 @@ def execute(event, context):
         if "body" in event.keys():
             data = event["body"]
             user = json.loads(data)
-            userId = get_random_id()
+            userId = user["userId"]
             email = user["email"]
             contact = user["contact"]
             userExistsByEmail = get_user_by_email(email)
@@ -32,8 +32,21 @@ def execute(event, context):
                 password = user["password"]
                 email = user["email"]
                 contact = user["contact"]
-                res = put_data_to_dynamo(
-                    userId, userFname, userLname, email, contact, password
+                dob = user["dob"]
+                gender = user["gender"]
+                martialstatus = user["martialstatus"]
+                status = user["status"]
+                res = update_data_to_dynamo(
+                    userId,
+                    userFname,
+                    userLname,
+                    email,
+                    contact,
+                    password,
+                    dob,
+                    gender,
+                    martialstatus,
+                    status,
                 )
                 return {"statusCode": "201", "body": "User Register Successfully"}
     except Exception as ex:
@@ -41,28 +54,47 @@ def execute(event, context):
         return {"statusCode": "503", "body": "Error"}
 
 
-def put_data_to_dynamo(userId, userFname, userLname, email, contact, password):
+def update_data_to_dynamo(
+    userId,
+    userFname,
+    userLname,
+    email,
+    contact,
+    password,
+    dob,
+    gender,
+    martialstatus,
+    status,
+):
     dynamoObj = get_dynamo()
     username = userFname[0:3] + userLname[0:3]
-    print(username)
-    dynamoObj.put_item(
-        Item={
-            "userId": userId,
-            "userFname": userFname,
-            "userLname": userLname,
-            "username": username,
-            "email": email,
-            "password": password,
-            "active": 0,
-            "contact": contact,
-        }
+    expression = "SET "
+    expressionValues = {}
+    updatedFields = {
+        "userId": userId,
+        "userFname": userFname,
+        "userLname": userLname,
+        "username": username,
+        "email": email,
+        "password": password,
+        "active": status,
+        "contact": contact,
+        "dob": dob,
+        "gender": gender,
+        "martialstatus": martialstatus,
+    }
+
+    for key, value in updatedFields.items():
+        expression += f"{key} = :{key}, "
+        expressionValues[f":{key}"] = value
+        expression = expression.rstrip(", ")
+
+    dynamoObj.update_item(
+        Key={"userId": userId},
+        UpdateExpression=expression,
+        ExpressionAttributeValues=expressionValues,
     )
     return "Success"
-
-
-def get_random_id():
-    id = str(uuid.uuid4())
-    return id
 
 
 def get_dynamo():
