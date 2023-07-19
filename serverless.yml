@@ -52,28 +52,6 @@ functions:
     events:
       - http:
           path: /${self:service}/aamhi-unique-login-user
-          method: put
-          # authorizer: 
-          #   type: token
-          #   identitySource: method.request.header.Authorization
-          #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
-    environment:
-      apiId: !Ref ApiGatewayRestApi
-      AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
-
-  AamhiUniqueUpdateUser:
-    handler: src/user/updateuser.execute
-    name: ${self:service}-update-aamhi-unique-user
-    role: AamhiUniqueRegisterUserRole
-    logSubcription: true
-    package:
-      exclude:
-        - ./**
-      include:
-        - ./src/user/updateuser.py
-    events:
-      - http:
-          path: /${self:service}/aamhi-unique-update-user
           method: post
           # authorizer: 
           #   type: token
@@ -82,6 +60,28 @@ functions:
     environment:
       apiId: !Ref ApiGatewayRestApi
       AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
+
+  # AamhiUniqueUpdateUser:
+  #   handler: src/user/updateuser.execute
+  #   name: ${self:service}-update-aamhi-unique-user
+  #   role: AamhiUniqueRegisterUserRole
+  #   logSubcription: true
+  #   package:
+  #     exclude:
+  #       - ./**
+  #     include:
+  #       - ./src/user/updateuser.py
+  #   events:
+  #     - http:
+  #         path: /${self:service}/aamhi-unique-update-user
+  #         method: put
+  #         # authorizer: 
+  #         #   type: token
+  #         #   identitySource: method.request.header.Authorization
+  #         #   arn: arn:aws:cognito-idp:us-east-1:124375682725:userpool/us-east-1_g0pSXvXvW
+  #   environment:
+  #     apiId: !Ref ApiGatewayRestApi
+  #     AAMHI_UNIQUE_REGISTER_TABLE: !Ref usersTable
 
   AamhiUniqueGetAllUser:
     handler: src/user/getusers.execute
