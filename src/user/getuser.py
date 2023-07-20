@@ -2,7 +2,7 @@ import json
 import os
 import boto3
 
-TAG = "Delete Aamhi unique User"
+TAG = "Get Aamhi unique User"
 
 
 def execute(event, context):

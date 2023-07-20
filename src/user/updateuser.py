@@ -3,7 +3,7 @@ import os
 import uuid
 import boto3
 
-TAG = "Register Aamhi unique User"
+TAG = "Update Aamhi unique User"
 
 
 def execute(event, context):
